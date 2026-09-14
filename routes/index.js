@@ -20,4 +20,8 @@ router.get('/health', (_req, res) => {
     });
 });
 
+import paymentRoutes from './paymentRoutes.js';
+
+router.use('/payment', paymentRoutes);
+
 export default router;
