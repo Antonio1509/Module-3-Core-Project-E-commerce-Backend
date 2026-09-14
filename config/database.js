@@ -29,7 +29,11 @@ async function testConnection() {
     console.log("✅ MySQL connected:", process.env.DB_NAME || "localcart");
     conn.release();
   } catch (err) {
+<<<<<<< HEAD
     console.error("❌ MySQL connection failed:", err.message);
+=======
+  console.error("❌ MySQL connection failed:", err);
+>>>>>>> 9fe5ae188ada79138de2dde7b27152ad2fa9a820
   }
 }
 
