@@ -26,14 +26,10 @@ const pool = mysql.createPool({
 async function testConnection() {
   try {
     const conn = await pool.getConnection();
-    console.log("✅ MySQL connected:", process.env.DB_NAME || "localcart");
+    console.log(" MySQL connected:", process.env.DB_NAME || "localcart");
     conn.release();
   } catch (err) {
-<<<<<<< HEAD
-    console.error("❌ MySQL connection failed:", err.message);
-=======
-  console.error("❌ MySQL connection failed:", err);
->>>>>>> 9fe5ae188ada79138de2dde7b27152ad2fa9a820
+    console.error(" MySQL connection failed:", err.message);
   }
 }
 

@@ -31,11 +31,7 @@ async function sendSMS(to, body) {
   const formattedTo = toInternational(to);
 
   if (!client) {
-<<<<<<< HEAD
-    console.log(`[DEV MODE — no Twilio credentials set] SMS to ${formattedTo}: "${body}"`);
-=======
     console.log(`📱 [DEV MODE — no Twilio credentials set] SMS to ${formattedTo}: "${body}"`);
->>>>>>> 9fe5ae188ada79138de2dde7b27152ad2fa9a820
     return { success: true, dev: true };
   }
 
@@ -45,10 +41,10 @@ async function sendSMS(to, body) {
       from: process.env.TWILIO_FROM_NUMBER,
       body
     });
-    console.log(`📱 SMS sent to ${formattedTo}: ${message.sid}`);
+    console.log(` SMS sent to ${formattedTo}: ${message.sid}`);
     return { success: true, sid: message.sid };
   } catch (err) {
-    console.error(`❌ SMS to ${formattedTo} failed:`, err.message);
+    console.error(` SMS to ${formattedTo} failed:`, err.message);
     return { success: false, error: err.message };
   }
 }
