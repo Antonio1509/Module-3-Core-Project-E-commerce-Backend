@@ -9,9 +9,6 @@ export const initiatePayment = (req, res) => {
             return res.status(400).json({ success: false, error: 'Missing required payment details.' });
         }
 
-        // Here, you should ideally verify the order amount against your database
-        // to prevent fraud.
-
         const { payfastUrl, paymentData } = createPayFastPayment({
             orderNumber,
             totalAmount,

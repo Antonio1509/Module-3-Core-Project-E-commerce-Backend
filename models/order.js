@@ -144,8 +144,8 @@ class Order {
             `SELECT 
                 o.*,
                 (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count,
-                (SELECT GROUP_CONCAT(DISTINCT vendor_name) FROM order_items oi 
-                 JOIN vendors v ON oi.vendor_id = v.id 
+                (SELECT GROUP_CONCAT(DISTINCT v.name) FROM order_items oi
+                 JOIN vendors v ON oi.vendor_id = v.id
                  WHERE oi.order_id = o.id) as vendors
              FROM orders o
              WHERE o.user_id = ?

@@ -1,9 +1,6 @@
 // services/payfastService.js
 import crypto from 'crypto';
 
-// The base URL changes based on sandbox mode.
-// Sandbox: https://sandbox.payfast.co.za/eng/process
-// Live: https://www.payfast.co.za/eng/process
 const PAYFAST_PROCESS_URL = process.env.PAYFAST_SANDBOX === 'true'
     ? 'https://sandbox.payfast.co.za/eng/process'
     : 'https://www.payfast.co.za/eng/process';

@@ -1,17 +1,41 @@
-// routes/index.js - Temporary placeholder
 import express from 'express';
+
+// ============================================================
+// ROUTE IMPORTS
+// ============================================================
+
 import cartRoutes from './cartRoutes.js';
 import orderRoutes from './orderRoutes.js';
-router.use('/auth', authRoutes);
+import paymentRoutes from './paymentRoutes.js';
+import authRoutes from './authRoutes.js';
+import userRoutes from './userRoutes.js';
+import productRoutes from './productRoutes.js';
+import vendorRoutes from './vendorRoutes.js';
+import shipmentRoutes from './shipmentRoutes.js';
+import subscriptionRoutes from './subscriptionRoutes.js';
+import deliveryRoutes from './deliveryRoutes.js';
+import analyticsRoutes from './analyticsRoutes.js';
 
+// ============================================================
+// ROUTER SETUP
+// ============================================================
 const router = express.Router();
 
-// working routes
-router.use('/auth', authRoutes);
 router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
+router.use('/payment', paymentRoutes);
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/products', productRoutes);
+router.use('/vendors', vendorRoutes);
+router.use('/shipments', shipmentRoutes);
+router.use('/subscriptions', subscriptionRoutes);
+router.use('/delivery', deliveryRoutes);
+router.use('/analytics', analyticsRoutes);
 
-// Health check
+// ============================================================
+// HEALTH CHECK
+// ============================================================
 router.get('/health', (_req, res) => {
     res.json({
         success: true,
@@ -19,9 +43,5 @@ router.get('/health', (_req, res) => {
         timestamp: new Date().toISOString()
     });
 });
-
-import paymentRoutes from './paymentRoutes.js';
-
-router.use('/payment', paymentRoutes);
 
 export default router;
