@@ -1,4 +1,5 @@
 import Product from '../models/product.js';
+import pool from '../config/database.js';
 import { validateProduct, validateProductUpdate } from '../validations/productValidation.js';
 
 
@@ -48,6 +49,31 @@ export async function getProductById(req, res) {
             message: 'Internal server error'
         });
     }
+}
+
+export async function getProductReviews(req, res) {
+    const [rows] = await pool.query(
+        `SELECT r.id, r.rating, r.comment, r.created_at, u.name AS user_name
+         FROM reviews r JOIN users u ON u.id = r.user_id
+         WHERE r.product_id = ? ORDER BY r.created_at DESC`,
+        [req.params.id]
+    );
+    res.json({ success: true, data: rows });
+}
+
+export async function createProductReview(req, res) {
+    const productId = Number(req.params.id);
+    const rating = Number(req.body.rating);
+    const comment = String(req.body.comment || '').trim();
+    if (!Number.isInteger(productId) || !Number.isInteger(rating) || rating < 1 || rating > 5 || !comment) {
+        return res.status(400).json({ message: 'Product, rating from 1 to 5, and comment are required' });
+    }
+    await pool.query(
+        `INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE rating = VALUES(rating), comment = VALUES(comment)`,
+        [productId, req.user.id, rating, comment]
+    );
+    res.status(201).json({ success: true, message: 'Review saved' });
 }
 
 

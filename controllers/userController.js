@@ -137,3 +137,33 @@ export async function getAllUsers(req, res) {
         });
     }
 }
+
+export async function getFollowing(req, res) {
+    const [rows] = await pool.query(
+        `SELECT v.* FROM user_follows_vendor f
+         JOIN vendors v ON v.id = f.vendor_id
+         WHERE f.user_id = ? ORDER BY f.followed_at DESC`,
+        [req.user.id]
+    );
+    res.json({ success: true, data: rows });
+}
+
+export async function followVendor(req, res) {
+    const vendorId = Number(req.params.vendorId);
+    if (!Number.isInteger(vendorId)) return res.status(400).json({ message: 'Invalid vendor ID' });
+    await pool.query(
+        'INSERT IGNORE INTO user_follows_vendor (user_id, vendor_id) VALUES (?, ?)',
+        [req.user.id, vendorId]
+    );
+    res.json({ success: true, following: true });
+}
+
+export async function unfollowVendor(req, res) {
+    const vendorId = Number(req.params.vendorId);
+    if (!Number.isInteger(vendorId)) return res.status(400).json({ message: 'Invalid vendor ID' });
+    await pool.query(
+        'DELETE FROM user_follows_vendor WHERE user_id = ? AND vendor_id = ?',
+        [req.user.id, vendorId]
+    );
+    res.json({ success: true, following: false });
+}

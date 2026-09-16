@@ -4,6 +4,8 @@ import upload from '../middleware/upload.js';
 import {
     getAllProducts,
     getProductById,
+    getProductReviews,
+    createProductReview,
     getVendorProducts,
     createProduct,
     updateProduct,
@@ -16,6 +18,8 @@ const router = express.Router();
 
 // Public routes
 router.get('/', optionalAuth, getAllProducts);
+router.get('/:id/reviews', optionalAuth, getProductReviews);
+router.post('/:id/reviews', authenticate, createProductReview);
 router.get('/:id', optionalAuth, getProductById);
 router.get('/vendor/:vendorId', getVendorProducts);
 
