@@ -1,4 +1,4 @@
-import pool from '../config/database.js';
+import pool from "../config/database.js";
 
 // NOTE: This controller was an empty file in the original project (no
 // endpoints existed at all). The functions below are a best-effort,
@@ -22,7 +22,7 @@ export const getVendorSummary = async (req, res) => {
        FROM order_items oi
        WHERE oi.vendor_id = ?
          AND oi.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`,
-      [vendorId]
+      [vendorId],
     );
 
     const [[previous]] = await pool.query(
@@ -33,39 +33,43 @@ export const getVendorSummary = async (req, res) => {
        WHERE oi.vendor_id = ?
          AND oi.created_at >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)
          AND oi.created_at <  DATE_SUB(CURDATE(), INTERVAL 30 DAY)`,
-      [vendorId]
+      [vendorId],
     );
 
     const [[productStats]] = await pool.query(
       `SELECT COUNT(*) AS product_count
        FROM products
        WHERE vendor_id = ? AND status = 'published'`,
-      [vendorId]
+      [vendorId],
     );
 
     const revenue = Number(current.revenue);
     const orderCount = Number(current.order_count);
     const avgOrderValue = orderCount ? revenue / orderCount : 0;
 
-    const revenueChangePct = previous.revenue > 0
-      ? Math.round(((revenue - previous.revenue) / previous.revenue) * 100)
-      : null;
-    const orderChangePct = previous.order_count > 0
-      ? Math.round(((orderCount - previous.order_count) / previous.order_count) * 100)
-      : null;
+    const revenueChangePct =
+      previous.revenue > 0
+        ? Math.round(((revenue - previous.revenue) / previous.revenue) * 100)
+        : null;
+    const orderChangePct =
+      previous.order_count > 0
+        ? Math.round(
+            ((orderCount - previous.order_count) / previous.order_count) * 100,
+          )
+        : null;
 
     res.json({
-      period: 'last_30_days',
+      period: "last_30_days",
       revenue: Number(revenue.toFixed(2)),
       orders: orderCount,
       avg_order_value: Number(avgOrderValue.toFixed(2)),
       published_products: productStats.product_count,
       revenue_change_pct: revenueChangePct,
-      order_change_pct: orderChangePct
+      order_change_pct: orderChangePct,
     });
   } catch (error) {
-    console.error('getVendorSummary error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("getVendorSummary error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -85,19 +89,19 @@ export const getVendorSalesOverTime = async (req, res) => {
          AND oi.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
        GROUP BY DATE(oi.created_at)
        ORDER BY date ASC`,
-      [vendorId]
+      [vendorId],
     );
 
     res.json(
-      rows.map(r => ({
+      rows.map((r) => ({
         date: r.date,
         revenue: Number(r.revenue),
-        orders: r.orders
-      }))
+        orders: r.orders,
+      })),
     );
   } catch (error) {
-    console.error('getVendorSalesOverTime error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("getVendorSalesOverTime error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -119,19 +123,64 @@ export const getVendorTopProducts = async (req, res) => {
        GROUP BY oi.product_id, oi.product_name
        ORDER BY revenue DESC
        LIMIT ?`,
-      [vendorId, limit]
+      [vendorId, limit],
     );
 
     res.json(
-      rows.map(r => ({
+      rows.map((r) => ({
         product_id: r.product_id,
         name: r.product_name,
         units_sold: r.units_sold,
-        revenue: Number(r.revenue)
-      }))
+        revenue: Number(r.revenue),
+      })),
     );
   } catch (error) {
-    console.error('getVendorTopProducts error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("getVendorTopProducts error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// @desc    Orders containing products sold by the logged-in vendor.
+// @route   GET /api/analytics/vendor/orders
+export const getVendorOrders = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         o.id,
+         o.order_number,
+         CASE
+           WHEN s.status IS NOT NULL THEN s.status
+           WHEN o.status IN ('pending', 'confirmed', 'packing') THEN 'processing'
+           ELSE o.status
+         END AS status,
+         o.created_at,
+         u.name AS customer_name,
+         u.email,
+         GROUP_CONCAT(
+           CONCAT(oi.product_name, ' x ', oi.quantity)
+           ORDER BY oi.product_name SEPARATOR ', '
+         ) AS items,
+         COALESCE(SUM(oi.price * oi.quantity), 0) AS total_amount
+      FROM order_items oi
+       JOIN orders o ON o.id = oi.order_id
+       JOIN users u ON u.id = o.user_id
+      LEFT JOIN shipments s ON s.order_id = o.id AND s.vendor_id = ?
+       WHERE oi.vendor_id = ?
+      GROUP BY o.id, o.order_number, o.status, s.status, o.created_at, u.name, u.email
+       ORDER BY o.created_at DESC`,
+      [req.user.vendor_id, req.user.vendor_id],
+    );
+
+    res.json({
+      success: true,
+      data: rows.map((row) => ({
+        ...row,
+        total_amount: Number(row.total_amount),
+        items: row.items || "",
+      })),
+    });
+  } catch (error) {
+    console.error("getVendorOrders error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

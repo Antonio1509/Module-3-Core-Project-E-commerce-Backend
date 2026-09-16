@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS pickup_points;
 DROP TABLE IF EXISTS delivery_methods;
 DROP TABLE IF EXISTS shipments;
 DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS cart_items;
 DROP TABLE IF EXISTS products;
@@ -90,6 +91,20 @@ CREATE TABLE products (
     INDEX idx_status (status),
     INDEX idx_price (price),
     INDEX idx_stock (stock)
+) ENGINE=InnoDB;
+
+-- PRODUCT REVIEWS TABLE
+CREATE TABLE reviews (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating TINYINT NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_product_review (product_id, user_id),
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CHECK (rating BETWEEN 1 AND 5)
 ) ENGINE=InnoDB;
 
 -- CART ITEMS TABLE
@@ -300,7 +315,7 @@ INSERT IGNORE INTO vendors (user_id, name, category, location, cover_image, logo
 
 -- Sample Products
 INSERT IGNORE INTO products (vendor_id, name, price, unit, stock, category, image, status) VALUES
-(1, 'Farmhouse Sourdough Loaf', 65.00, 'each', 12, 'Bakery', 'https://images.unsplash.com/photo-1585478259715-4d3a5f4d3a3f?w=500&q=60', 'published'),
+(1, 'Farmhouse Sourdough Loaf', 65.00, 'each', 12, 'Bakery', 'https://i.ibb.co/G47bVMcD/farmhouse-white-sourdough-recipe-card.jpg', 'published'),
 (1, 'Amagwinya (6-pack)', 45.00, 'pack', 20, 'Bakery', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=60', 'published'),
 (1, 'Malva Pudding Cake', 180.00, 'whole cake', 4, 'Bakery', 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=500&q=60', 'published'),
 (2, 'Telephone-Wire Basket, Large', 620.00, 'each', 6, 'Crafts', 'https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=500&q=60', 'published'),
