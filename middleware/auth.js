@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/users');
+import jwt from 'jsonwebtoken';
+import User from '../models/users.js';
+import pool from '../config/database.js';
 
 const protect = async (req, res, next) => {
   let token;
@@ -19,10 +20,30 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ message: 'Not authorized, user not found' });
     }
     req.user = user;
+
+    if (user.is_vendor) {
+      const [vendorRows] = await pool.query(
+        'SELECT id FROM vendors WHERE user_id = ? LIMIT 1',
+        [user.id]
+      );
+
+      if (vendorRows.length) {
+        req.user.vendor_id = vendorRows[0].id;
+      }
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Not authorized, token failed' });
   }
 };
 
-module.exports = { protect };
+const requireVendor = (req, res, next) => {
+  if (!req.user || !req.user.vendor_id) {
+    return res.status(403).json({ message: 'Vendor profile required' });
+  }
+
+  next();
+};
+
+export { protect, requireVendor };

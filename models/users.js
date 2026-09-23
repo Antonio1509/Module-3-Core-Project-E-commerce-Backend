@@ -1,5 +1,5 @@
-const bcrypt = require('bcryptjs');
-const pool = require('../config/database');
+import bcrypt from 'bcryptjs';
+import pool from '../config/database.js';
 
 const findByEmail = async (email) => {
 	const [rows] = await pool.execute(
@@ -41,4 +41,5 @@ const comparePassword = (password, passwordHash) => {
 	return bcrypt.compare(password, passwordHash);
 };
 
-module.exports = { findByEmail, findById, create, comparePassword };
+export { findByEmail, findById, create, comparePassword };
+export default { findByEmail, findById, create, comparePassword };

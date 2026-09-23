@@ -141,6 +141,13 @@ CREATE TABLE shipments (
     order_id INT NOT NULL,
     vendor_id INT NOT NULL,
     pickup_point VARCHAR(255) NOT NULL,
+    method VARCHAR(20) GENERATED ALWAYS AS (
+        CASE
+            WHEN pickup_point LIKE '%Rank%' THEN 'RankDrop'
+            ELSE 'Home Delivery'
+        END
+    ) STORED,
+    delivery_type ENUM('normal', 'return') NOT NULL DEFAULT 'normal',
     collection_code VARCHAR(10),
     status ENUM('processing', 'in_transit', 'at_rank', 'collected', 'delivered') DEFAULT 'processing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -216,8 +223,10 @@ INSERT IGNORE INTO order_items (order_id, product_id, vendor_id, quantity, price
 (1, 6, 3, 1, 285.00, 'Buchu & Rooibos Face Serum');
 
 -- Sample Shipment
-INSERT IGNORE INTO shipments (shipment_id, order_id, vendor_id, pickup_point, collection_code, status) VALUES
-('RD-10482', 1, 1, 'Site B Rank', '2841', 'processing');
+INSERT IGNORE INTO shipments
+    (shipment_id, order_id, vendor_id, pickup_point, collection_code, status, delivery_type)
+VALUES
+    ('RD-10482', 1, 1, 'Site B Rank', '2841', 'processing', 'normal');
 
 -- VERIFY DATA
 SELECT 'Users' as Table_Name, COUNT(*) as Count FROM users
