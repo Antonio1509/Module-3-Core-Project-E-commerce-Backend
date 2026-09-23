@@ -73,12 +73,13 @@ app.use(
       "http://localhost:5501",
       "http://127.0.0.1:5501",
       "http://localhost:5000",
+      "http://localhost:5173",
+      "http://e-commercelocalcart.netlify.app",
       process.env.CORS_ORIGIN,
     ].filter(Boolean),
     credentials: true,
   }),
 );
-
 // Body parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
